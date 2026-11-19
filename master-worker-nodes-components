@@ -1,0 +1,136 @@
+# Kubernetes Cluster Components
+
+## Control Plane (Master Node) Components
+
+### 1. kube-apiserver
+- The central management component of Kubernetes that exposes the Kubernetes API.
+- All communication between users, controllers, schedulers, and worker nodes passes through the API Server.
+
+### 2. etcd
+- A distributed key-value store that holds the entire cluster state and configuration data.
+- Stores information about nodes, pods, services, secrets, and cluster metadata.
+
+### 3. kube-scheduler
+- Responsible for assigning newly created Pods to appropriate worker nodes.
+- Selects nodes based on resource availability, affinity rules, taints, tolerations, and other scheduling policies.
+
+### 4. kube-controller-manager
+- Runs various controllers that continuously monitor and maintain the desired cluster state.
+- Includes Node Controller, Replication Controller, Deployment Controller, Endpoint Controller, and others.
+
+### 5. cloud-controller-manager (Optional)
+- Integrates Kubernetes with cloud providers such as Azure, AWS, and GCP.
+- Manages cloud resources like Load Balancers, Volumes, and Node lifecycle operations.
+
+---
+
+## Worker Node Components
+
+### 1. kubelet
+- The primary node agent running on every worker node.
+- Communicates with the API Server and ensures containers are running as defined in Pod specifications.
+
+### 2. kube-proxy
+- Maintains network rules on worker nodes.
+- Handles Service networking and forwards traffic to the correct Pods.
+
+### 3. Container Runtime
+- Software responsible for running containers.
+- Popular runtimes include containerd, CRI-O, and Docker Engine (legacy support).
+
+### 4. Pods
+- The smallest deployable unit in Kubernetes.
+- Contains one or more containers that share networking and storage resources.
+
+---
+
+# Kubernetes Architecture Flow
+
+```text
++====================================================+
+|              CONTROL PLANE (MASTER NODE)           |
++====================================================+
+
+     User / kubectl
+            |
+            v
+ +---------------------+
+ |   kube-apiserver    |
+ +---------------------+
+       |         |
+       |         |
+       v         v
+ +-----------+  +------------------+
+ |   etcd    |  | kube-scheduler   |
+ +-----------+  +------------------+
+                      |
+                      |
+                      v
+
+======================================================
+              WORKER NODE
+======================================================
+
+             +------------+
+             |  kubelet   |
+             +------------+
+                    |
+                    v
+         +----------------------+
+         | Container Runtime    |
+         | (containerd/CRI-O)   |
+         +----------------------+
+                    |
+                    v
+             +------------+
+             |    Pods    |
+             +------------+
+                    ^
+                    |
+             +------------+
+             | kube-proxy |
+             +------------+
+```
+
+---
+
+# End-to-End Request Flow
+
+```text
+1. User executes:
+   kubectl apply -f nginx.yaml
+
+2. kube-apiserver receives the request.
+
+3. API Server stores desired state in etcd.
+
+4. kube-scheduler selects a suitable Worker Node.
+
+5. kubelet on the selected Worker Node receives Pod details.
+
+6. kubelet asks the Container Runtime to:
+   - Pull image
+   - Create container
+   - Start Pod
+
+7. kube-proxy configures networking and Service routing.
+
+8. Pod becomes Running and serves application traffic.
+```
+
+---
+
+# Quick Summary
+
+### Master Node Components
+- kube-apiserver → Communication Hub
+- etcd → Cluster Database
+- kube-scheduler → Pod Placement Decision Maker
+- kube-controller-manager → State Maintenance
+- cloud-controller-manager → Cloud Integrations
+
+### Worker Node Components
+- kubelet → Node Agent
+- kube-proxy → Networking Component
+- Container Runtime → Container Execution Engine
+- Pods → Application Workloads
